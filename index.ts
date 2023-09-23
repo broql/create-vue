@@ -8,6 +8,7 @@ import prompts from 'prompts'
 import { red, green, bold } from 'kolorist'
 
 import ejs from 'ejs'
+import { parseArgs } from '@pkgjs/parseargs'
 
 import * as banners from './utils/banners'
 
@@ -69,30 +70,65 @@ async function init() {
   console.log()
 
   const cwd = process.cwd()
+
   // possible options:
-  // --default
-  // --typescript / --ts
-  // --jsx
-  // --router / --vue-router
-  // --pinia
-  // --with-tests / --tests (equals to `--vitest --cypress`)
-  // --vitest
-  // --cypress
-  // --nightwatch
-  // --playwright
-  // --eslint
-  // --eslint-with-prettier (only support prettier through eslint for simplicity)
-  // --force (for force overwriting)
-  const argv = minimist(process.argv.slice(2), {
-    alias: {
-      typescript: ['ts'],
-      'with-tests': ['tests'],
-      router: ['vue-router']
+  const argvRaw = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      default: {
+        type: 'boolean'
+      },
+      typescript: {
+        short: 't',
+        type: 'boolean'
+      },
+      jsx: {
+        type: 'boolean'
+      },
+      router: {
+        short: 'r',
+        type: 'boolean'
+      },
+      pinia: {
+        type: 'boolean'
+      },
+      // --with-tests / --tests (equals to `--vitest --cypress`)
+      'with-tests': {
+        short: 'w',
+        type: 'boolean'
+      },
+      vitest: {
+        type: 'boolean'
+      },
+      cypress: {
+        type: 'boolean'
+      },
+      nightwatch: {
+        type: 'boolean'
+      },
+      playwright: {
+        type: 'boolean'
+      },
+      eslint: {
+        type: 'boolean'
+      },
+      // only support prettier through eslint for simplicity+
+      'eslint-with-prettier': {
+        type: 'boolean'
+      },
+      // for force overwriting
+      force: {
+        short: 'f',
+        type: 'boolean'
+      }
     },
-    string: ['_'],
-    // all arguments are treated as booleans
-    boolean: true
+    allowPositionals: true
   })
+
+  const argv = {
+    _: argvRaw.positionals,
+    ...argvRaw.values
+  }
 
   // if any of the feature flags is set, we would skip the feature prompts
   const isFeatureFlagsUsed =
